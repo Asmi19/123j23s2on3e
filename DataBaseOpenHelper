@@ -1,0 +1,1058 @@
+package attendance.com.attendance;
+
+import java.sql.Date;
+import java.sql.Time;
+import java.util.ArrayList;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.database.MatrixCursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Bundle;
+import android.util.Log;
+
+public class DataBaseOpenHelper extends SQLiteOpenHelper {
+	
+	// Logcat tag
+    private static final String LOG = "DatabaseHelper";
+ 
+    // Database Version
+    private static final int DATABASE_VERSION = 4;
+    
+    // Database Name
+    private static final String DATABASE_NAME = "attdb";
+    
+    private SQLiteDatabase myDataBase; 
+   
+       String type1 ="teacher";
+       String type2="student";
+       //String classcode=AttendanceTracker.classcode;
+       String tablename,classcode;
+       int countto,countfrom,id;
+       int table_created_flag=0;
+       int cnt;
+       Bundle bndl;
+    // Table Names
+    private static final String TABLE_USERS = "users";
+    private static final String TABLE_TSUBJECT = "teachers_subjects";
+    private static final String TABLE_SUBJECTS = "subjects";
+    private static final String TABLE_DTEACHERS = "department_teachers";
+    private static final String TABLE_DCLASSES = "department_classes";
+    private static final String TABLE_RECENTLY_ACCESED_TABLE = "recently_accesed_table";
+    private static final String TABLE_PRACTICAL_BATCH = "practical_batches";
+    private static final String TABLE_CLASSES = "classes";
+    private static final String TABLE_ADMIN_LOGIN = "admin_login_table";
+    private static final String TABLE_SYNC_STATUS = "android_sync_status";
+    private static final String TABLE_STUDENT_PRACTICAL_BATCH = "student_practical_batch";
+    
+ // USERS Table - column names
+    private static final String KEY_ID = "id";
+    private static final String KEY_USERNAME = "username";
+    private static final String KEY_PASSWORD = "password";
+    private static final String KEY_FNAME = "firstname";
+    private static final String KEY_MNAME = "middlename";
+    private static final String KEY_LNAME = "lastname";
+    private static final String KEY_CLASSCODE = "class_code";
+    private static final String KEY_ROLLNO = "rollno";
+    private static final String KEY_TYPE = "type";
+    private static final String KEY_PRIVILEGE = "privilege";
+    private static final String KEY_CONTACTNUM = "contact_nos";
+    private static final String KEY_PGUARDNUM = "primary_guardian_contact";
+    private static final String KEY_PSMSL = "preferred_sms_language";
+    private static final String KEY_EMAIL = "email";
+    private static final String KEY_BIOID = "bioid";
+    private static final String KEY_ACTIVATED = "activated";
+    private static final String KEY_MLANG = "multilanguage";
+    private static final String KEY_PURL = "photourl";
+    private static final String KEY_ICARDPHT = "icard_photo";
+  
+    private static final String KEY_DATETIME="datetime";
+    
+    // teachers_subjects Table - column names
+   // private static final String KEY_ID = "id";
+  // private static final String KEY_BIOID = "bioid";
+    private static final String KEY_SUBJECT = "subject";
+  //  private static final String KEY_CLASSCODE = "class_code";
+    private static final String KEY_ATT_TYPE = "att_type";
+    //private static final String KEY_BATCHID="batch_id";  
+      
+    
+ // subjects Table - column names
+     private static final String KEY_SUBJECT_CODE = "subject_code";
+     private static final String KEY_SUBNAME = "subject_name";
+     private static final String KEY_SHORTNAME = "short_name";
+     private static final String KEY_GROUPNAME = "group_name";
+    
+  // department_teachers Table - column names
+     // private static final String KEY_ID = "id";
+    // private static final String KEY_BIOID = "bioid";
+      private static final String KEY_DEPTID = "dept_id";
+      private static final String KEY_PRVTYPE = "prv_type";
+     
+   // department_classes Table - column names
+      // private static final String KEY_ID = "id";
+      //private static final String KEY_DEPTID = "dept_id";
+      //private static final String KEY_CLASSCODE = "class_code";
+      
+   // recently_accesed_table Table - column names
+   //   private static final String KEY_ID = "id";
+      private static final String KEY_TABLENAME = "tablename";
+      private static final String KEY_READFLAG = "read_flag";
+      private static final String KEY_SERVER_RESPONSE = "server_response";
+      private static final String KEY_COUNTFROM = "countfrom";
+      private static final String KEY_COUNTTO = "countto";
+      private static final String KEY_AUTH_BIOID = "att_auth_bioid";
+      private static final String KEY_AUTH_USERNAME = "auth_username";
+      private static final String KEY_APASSWORD = "auth_password";
+      
+    //batch Table - column names
+      // private static final String KEY_ID = "id";
+      //private static final String KEY_DEPTID = "dept_id";
+    //private static final String KEY_CLASSCODE = "class_code";
+    //private static final String KEY_SUBJECT_CODE = "subject_code";
+      private static final String KEY_BATCHNAME = "batch_name";
+      private static final String KEY_TBIOID = "teachers_bioid";
+      private static final String KEY_SERVERID = "server_table_id";
+      
+   // classes Table - column names
+      //   private static final String KEY_ID = "id";
+         private static final String KEY_CLASS_CODE = "class_code";
+         private static final String KEY_CLASS = "class";
+         private static final String KEY_SECTION = "section";
+         private static final String KEY_ACADEMIC_TITLE = "academic_title";
+         private static final String KEY_CUR_ACADEMIC_YEAR = "current_academic_year";
+         private static final String KEY_LAST_STUDENT_ID = "last_student_id";
+         private static final String KEY_TABLE_CREATED_FLAG = "table_created_flag";
+        
+      // admin_login_table Table - column names
+         //   private static final String KEY_ID = "id";
+            private static final String KEY_AUSERNAME = "android_username";
+            private static final String KEY_APASS = "android_password";
+            private static final String KEY_DATABASE_NAME = "dbname";
+            
+     //sync_status table- column names
+         // private static final String KEY_ID = "id"; 
+         // private static final String KEY_SERVERID = "server_table_id";
+            private static final String KEY_TABLE_NAME = "tablename";
+         //   private static final String KEY_DATETIME="datetime";  
+            
+    //student_practical_batch - column names
+         // private static final String KEY_ID= "id";
+        //  private static final String KEY_BIOID="bioid";
+           private static final String KEY_BATCHID="batch_id";  
+      //   private static final String KEY_DATETIME="datetime";  
+           
+           
+   // Table Create Statements
+      // users table create statement
+      private static final String CREATE_TABLE_USERS = "CREATE TABLE "
+              + TABLE_USERS + ""+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, " +KEY_USERNAME
+              + " TEXT," +KEY_PASSWORD+ " TEXT," +KEY_FNAME+ " TEXT," +KEY_MNAME+ " TEXT," +KEY_LNAME+ " TEXT," +KEY_CLASSCODE+ " TEXT," 
+              +KEY_ROLLNO+ " INTEGER," +KEY_TYPE+ " TEXT, " +KEY_PRIVILEGE+ " INTEGER, " +KEY_CONTACTNUM+ " TEXT," +KEY_PGUARDNUM+ " TEXT," +KEY_PSMSL 
+              + " INTEGER," +KEY_EMAIL+ " TEXT," +KEY_BIOID+ " TEXT," +KEY_ACTIVATED+ " INTEGER," +KEY_MLANG+ " TEXT," +KEY_PURL+ " TEXT," +KEY_ICARDPHT+ " TEXT," +KEY_SERVERID+ " INTEGER," +KEY_DATETIME+ " VARCHAR, UNIQUE("+KEY_USERNAME+"))";
+      
+      //teachers_subjects create Statement
+      private static final String CREATE_TABLE_TSUBJECT = "CREATE TABLE "
+              + TABLE_TSUBJECT + ""+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT," +KEY_BIOID+ " TEXT," +KEY_SUBJECT+ " TEXT, " +KEY_CLASSCODE+ " TEXT," +KEY_SERVERID+ " INTEGER NOT NULL UNIQUE," +KEY_DATETIME+ " VARCHAR,"+KEY_ATT_TYPE+" VARCHAR, "+KEY_BATCHID+" INTEGER)"; 
+      
+      //subjects table create statement
+      private static final String CREATE_TABLE_SUBJECTS = "CREATE TABLE "
+              + TABLE_SUBJECTS + ""+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+KEY_SUBJECT_CODE+" TEXT NOT NULL UNIQUE," +KEY_SUBNAME+ " TEXT," +KEY_SHORTNAME+ " TEXT, " +KEY_GROUPNAME+ " TEXT," +KEY_DATETIME+ " VARCHAR)"; 
+      
+    //department_teachers create Statement
+      private static final String CREATE_TABLE_DTEACHERS  = "CREATE TABLE "
+              + TABLE_DTEACHERS  + ""+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT," +KEY_DEPTID+ " INTEGER," +KEY_BIOID+ " TEXT, " +KEY_PRVTYPE+ " TEXT," +KEY_SERVERID+ " INTEGER NOT NULL UNIQUE," +KEY_DATETIME+ " VARCHAR)"; 
+      
+    //department_classes create Statement
+      private static final String CREATE_TABLE_DCLASSES  = "CREATE TABLE "
+              + TABLE_DCLASSES  + ""+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT," +KEY_DEPTID+ " INTEGER," +KEY_CLASSCODE+ " TEXT," +KEY_SERVERID+ " INTEGER NOT NULL UNIQUE," +KEY_DATETIME+ " VARCHAR)";  
+      
+    //recently_accesed_table create Statement
+      private static final String CREATE_TABLE_RECENTLY_ACCESED_TABLE  = "CREATE TABLE "
+              + TABLE_RECENTLY_ACCESED_TABLE  + ""+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT," +KEY_TABLENAME+ " TEXT," +KEY_READFLAG+ " INTEGER," +KEY_SERVER_RESPONSE+ " INTEGER," +KEY_COUNTFROM+ " INTEGER," +KEY_COUNTTO+ " INTEGER, " +KEY_AUTH_BIOID+ " TEXT, " +KEY_AUTH_USERNAME + " TEXT, " +KEY_APASSWORD+ " TEXT)";  
+     
+    //practical_batches table create Statement
+      private static final String CREATE_TABLE_BATCH  = "CREATE TABLE "
+              + TABLE_PRACTICAL_BATCH  + ""+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, " +KEY_BATCHNAME+ " TEXT," +KEY_SERVERID+ " INTEGER NOT NULL UNIQUE," +KEY_DATETIME+ " VARCHAR)";  
+     
+    //classes table create Statement
+      private static final String CREATE_TABLE_CLASSES = "CREATE TABLE "
+              + TABLE_CLASSES  + ""+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT," +KEY_CLASS_CODE+ " TEXT NOT NULL UNIQUE," +KEY_CLASS+ " TEXT," +KEY_SECTION+ " TEXT," +KEY_ACADEMIC_TITLE+ " TEXT," +KEY_CUR_ACADEMIC_YEAR+ " TEXT," +KEY_LAST_STUDENT_ID+ " INTEGER," +KEY_TABLE_CREATED_FLAG+ " INTEGER," +KEY_DATETIME+ " VARCHAR)";  
+     
+    //admin_table_login table create Statement
+      private static final String CREATE_TABLE_ADMIN_LOGIN = "CREATE TABLE "
+              + TABLE_ADMIN_LOGIN  + ""+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT," +KEY_AUSERNAME+ " TEXT UNIQUE," +KEY_APASS+ " TEXT," +KEY_DATABASE_NAME+ " TEXT)";  
+      
+    //android_sync_status table create Statement
+      private static final String CREATE_TABLE_SYNC_STATUS = "CREATE TABLE "
+              + TABLE_SYNC_STATUS  + ""+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT," +KEY_TABLE_NAME+ " TEXT," +KEY_DATETIME+ " VARCHAR," +KEY_SERVERID+ " INTEGER NOT NULL UNIQUE)";  
+      
+    //student_practical_batch table create statement  
+      private static final String CREATE_TABLE_STUDENT_PRACTICAL_BATCH = "CREATE TABLE "
+              + TABLE_STUDENT_PRACTICAL_BATCH  + ""+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT," +KEY_BIOID+ " TEXT," +KEY_DATETIME+ " VARCHAR," +KEY_BATCHID+ " INTEGER," +KEY_SERVERID+ " INTEGER NOT NULL UNIQUE)";  
+      
+	public DataBaseOpenHelper(Context context) {
+		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+		// TODO Auto-generated method stub
+		db.execSQL(CREATE_TABLE_USERS);
+		db.execSQL(CREATE_TABLE_TSUBJECT);
+		db.execSQL(CREATE_TABLE_SUBJECTS);
+		db.execSQL(CREATE_TABLE_DTEACHERS);
+		db.execSQL(CREATE_TABLE_DCLASSES);
+		db.execSQL(CREATE_TABLE_RECENTLY_ACCESED_TABLE);
+		db.execSQL(CREATE_TABLE_BATCH);
+		db.execSQL(CREATE_TABLE_CLASSES);
+		db.execSQL(CREATE_TABLE_ADMIN_LOGIN);
+		db.execSQL(CREATE_TABLE_SYNC_STATUS);
+		db.execSQL(CREATE_TABLE_STUDENT_PRACTICAL_BATCH);
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		// TODO Auto-generated method stub
+		// on upgrade drop older tables
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TSUBJECT);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SUBJECTS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_DTEACHERS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_DCLASSES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_RECENTLY_ACCESED_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PRACTICAL_BATCH);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASSES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ADMIN_LOGIN);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SYNC_STATUS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_STUDENT_PRACTICAL_BATCH);
+        onCreate(db);
+	}
+	//This method is call to insert the admin login details into sqlite
+	public void insert_admin(String uname, String pass, String dbname)
+	{
+		SQLiteDatabase sql = this.getWritableDatabase();
+		sql.execSQL("INSERT OR IGNORE INTO admin_login_table (android_username,android_password,dbname) VALUES ('"+uname+"','"+pass+"','"+dbname+"')");
+		Log.d("In databaseopenHelper class insert_admin", "sql");
+	}
+	
+	public String getEntry()
+   	{
+    	SQLiteDatabase db = this.getReadableDatabase();
+    	String query = "SELECT dbname as dbname FROM admin_login_table";
+   		Cursor cursor=db.rawQuery(query, null);
+           if(cursor.getCount()<0) // UserName Not Exist
+           {
+           	cursor.close();
+           	return "NOT EXIST";
+           }
+   	    cursor.moveToFirst();
+   		String dbname= cursor.getString(cursor.getColumnIndex("dbname"));
+   	    cursor.close();
+   		
+   		return dbname;
+   		
+   	}
+	
+	 public boolean Login(String username, String password) throws SQLException 
+		{
+			Cursor mCursor = myDataBase.rawQuery("SELECT username, password FROM users WHERE type='" +type1+"' AND username='"+username+"' AND password='"+password+"'", new String[]{username,password});
+			if (mCursor != null) {           
+				if(mCursor.getCount() > 0)
+				{
+					return true;
+				}
+			}
+		 return false;
+		}
+
+
+
+	    public String getSinlgeEntry(String userName)
+	   	{
+	    	//openDataBase();
+	    	String query = "SELECT password FROM users WHERE type='" +type1+"' AND username='"+userName+"'";
+	   		Cursor cursor=myDataBase.rawQuery(query, null);
+	           if(cursor.getCount()<0) // UserName Not Exist
+	           {
+	           	cursor.close();
+	           	return "NOT EXIST";
+	           }
+	   	    cursor.moveToFirst();
+	   		String password= cursor.getString(cursor.getColumnIndex("password"));
+	   	   // String bioid= cursor.getString(cursor.getColumnIndex("bioid"));
+	   	 
+	   		cursor.close();
+	   		
+	   		return password;
+	   		
+	   	}
+	    
+	    public String getBIOID(String bioname)
+	    {
+	    	 SQLiteDatabase sql = this.getReadableDatabase();
+	    	String query = "SELECT bioid FROM users WHERE type='" +type1+"' AND username='"+bioname+"'";
+	   		Cursor cursor=sql.rawQuery(query, null);
+	           if(cursor.getCount()<=0) // UserName Not Exist
+	           {
+	           	cursor.close();
+	           	return "NOT EXIST";
+	           }
+	   	    cursor.moveToFirst();
+	   	    String bioid= cursor.getString(cursor.getColumnIndex("bioid"));
+	   		cursor.close();
+	   		return bioid;
+	    }
+	   
+	    public Bundle getrecord(String uname) 
+	    {
+	        SQLiteDatabase sql = this.getReadableDatabase();
+	        Bundle cursorData = new Bundle();
+	       // String param[] = new String[1];
+	        //param[0] = firstname;
+	        Cursor c = sql.rawQuery("Select firstname, lastname FROM users WHERE type='" +type1+"' AND username='"+uname+"'", null);
+	        if (c.moveToFirst()) {
+	            do {
+
+	                cursorData.putString("firstname", c.getString(c.getColumnIndex("firstname")));
+	                cursorData.putString("lastname", c.getString(c.getColumnIndex("lastname")));  
+	               
+
+	            } while (c.moveToNext());
+	        }
+	        return cursorData;
+	    }
+	   
+	    public ArrayList<AttendancePOJO> getrecord(String classname, String countfrom, String countto) 
+	    {
+	       // SQLiteDatabase sql = this.getReadableDatabase();
+	    	ArrayList<AttendancePOJO> contactList = new ArrayList<AttendancePOJO>();
+	        Bundle cd = new Bundle();
+	        SQLiteDatabase sql = this.getReadableDatabase();
+	        Cursor c = sql.rawQuery("Select * FROM '"+classname+"' WHERE id>="+countfrom+" AND id<="+countto+"", null);
+	        if (c.moveToFirst()) {
+	            do {
+	            	AttendancePOJO cursorData=new AttendancePOJO();
+	                cursorData.setBioid(c.getString(c.getColumnIndex("bioid")));
+	                cursorData.setDate(c.getString(c.getColumnIndex("date")));  
+	                cursorData.setTime(c.getString(c.getColumnIndex("time"))); 
+	                cursorData.setSubject(c.getString(c.getColumnIndex("subject")));
+	                cursorData.setSlot(c.getString(c.getColumnIndex("slot")));
+	                cursorData.setAtt_type(c.getString(c.getColumnIndex("att_type")));
+	                contactList.add(cursorData);
+	                //Log.d("get Student records::", " " + contactList);
+	            } while (c.moveToNext());
+	        }
+	        Log.d("get Student records::", " " + contactList);
+	        return contactList;
+	        
+	    }
+	    
+	    public boolean validateUser(String userName, String password){  // This method is for login teachers.
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	    	//Log.d("username and password", " " +userName +" "+password);
+	    	   String query = "SELECT * FROM users WHERE  username ='" + userName +"' AND password='" +password+ "'";
+	    	   Log.d("query", " " +query);
+	    	   Cursor c = sql.rawQuery( query,  null);
+	    	   if (c.getCount()>0 && (c != null))
+	    		      return true;
+	    	   else
+	    	      return false;
+	    	}
+	    /*public String getAllData(String classname, String countfrom, String countto) {
+	    	ArrayList<HashMap<String, String>> wordList;
+			wordList = new ArrayList<HashMap<String, String>>();
+	        String selectQuery = "Select * FROM '"+classname+"' WHERE id>="+countfrom+" AND id<="+countto+""; 
+	        Log.d("Entire string::", " " + selectQuery);
+	        SQLiteDatabase db = this.getReadableDatabase();
+	        Cursor cursor =db.rawQuery(selectQuery, null);
+	        if (cursor.moveToFirst()) {
+		        do {
+		        	HashMap<String, String> map = new HashMap<String, String>();
+		        	map.put("bioid", cursor.getString(cursor.getColumnIndex("bioid")));
+		        	map.put("date", cursor.getString(cursor.getColumnIndex("date")));
+		        	map.put("time", cursor.getString(cursor.getColumnIndex("time")));
+		        	map.put("subject", cursor.getString(cursor.getColumnIndex("subject")));
+		        	map.put("slot", cursor.getString(cursor.getColumnIndex("slot")));
+		        	wordList.add(map);
+		        	
+		        } while (cursor.moveToNext());
+		    }
+		   //return cursor;
+			Gson gson = new GsonBuilder().create();
+			//Use GSON to serialize Array List to JSON
+			Log.d("In Function student data::", " " + gson.toJson(wordList));
+			return gson.toJson(wordList);
+			
+		}*/
+	    
+	    public ArrayList<recentlyPOJO> getrecentlydata()   // This method returns arraylist of recently_accessed_table data.
+	    {
+	    	ArrayList<recentlyPOJO> contactList = new ArrayList<recentlyPOJO>();
+	       SQLiteDatabase sql = this.getReadableDatabase();
+	    	
+	       Bundle cursorData = new Bundle();
+	        
+	        Cursor c = sql.rawQuery("Select * FROM recently_accesed_table", null);
+	        if (c.moveToFirst()) {
+	            do {
+	            	recentlyPOJO cd=new recentlyPOJO();
+	            	cd.setId(c.getString(c.getColumnIndex("id")));
+	            	cd.setTablename(c.getString(c.getColumnIndex("tablename")));  
+	            	cd.setCountfrom(c.getString(c.getColumnIndex("countfrom")));
+	            	cd.setCountto(c.getString(c.getColumnIndex("countto")));
+	            	cd.setAuthbioid(c.getString(c.getColumnIndex("att_auth_bioid")));
+	            	cd.setAuthuser(c.getString(c.getColumnIndex("auth_username")));
+	            	cd.setAuthpass(c.getString(c.getColumnIndex("auth_password")));
+	            	contactList.add(cd);
+	            	 Log.d("Entire string::", " " + contactList);
+	            } while (c.moveToNext());
+	        }
+	        return contactList;
+	       
+	    }
+	    
+	    public String getSubCode(String selectedsub){
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	        // Select All Query
+	        String selectQuery = "SELECT subject_code from subjects WHERE subject_name='"+selectedsub+"'";
+	       
+	        Cursor cursor = sql.rawQuery(selectQuery, null);
+	        if(cursor.getCount()<=0) // UserName Not Exist
+	           {
+	           	cursor.close();
+	           	return "NOT EXIST";
+	           }
+	   	    cursor.moveToFirst();
+	   	    String subjectcode= cursor.getString(cursor.getColumnIndex("subject_code"));
+	   	    Log.d("SubjectCode", " "+subjectcode);
+	   		cursor.close();
+	   		return subjectcode;
+	 }
+	/*    public String getEntry()
+	   	{
+	    	SQLiteDatabase db = this.getReadableDatabase();
+	    	String query = "SELECT databasename as databasename FROM database_name";
+	   		Cursor cursor=db.rawQuery(query, null);
+	           if(cursor.getCount()<0) // UserName Not Exist
+	           {
+	           	cursor.close();
+	           	return "NOT EXIST";
+	           }
+	   	    cursor.moveToFirst();
+	   		String dbname= cursor.getString(cursor.getColumnIndex("databasename"));
+	   	    cursor.close();
+	   		
+	   		return dbname;
+	   		
+	   	}*/
+	 
+	    
+	    
+	    /*public Bundle getrecentlydata()
+	    {
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	    	
+	        Bundle cursorData = new Bundle();
+	         
+	         Cursor c = sql.rawQuery("Select * FROM recently_accesed_table", null);
+	         if (c.moveToFirst()) {
+	             do {
+	            	 cursorData.putString("id", c.getString(c.getColumnIndex("_id")));
+	            	 cursorData.putString("classname", c.getString(c.getColumnIndex("tablename")));
+	            	 cursorData.putString("countfrom", c.getString(c.getColumnIndex("countfrom")));
+	            	 cursorData.putString("countto", c.getString(c.getColumnIndex("countto")));
+	            	 cursorData.putString("auth_bioid", c.getString(c.getColumnIndex("att_auth_bioid")));
+	            	 cursorData.putString("auth_username", c.getString(c.getColumnIndex("auth_username")));
+	            	 cursorData.putString("auth_password", c.getString(c.getColumnIndex("auth_password")));
+	             } while (c.moveToNext());
+	         }
+	         return cursorData;
+	    }*/
+	    
+	    public void updatesendStatus(int id, int status){            //This Method call to update send status to 1 when json data is created
+			SQLiteDatabase database = this.getWritableDatabase();
+			Log.d("Status ",""+status);		
+			String updateQuery = "Update recently_accesed_table set read_flag = "+ status +" where id="+ id ;
+			Log.d("UpdateSend Status ",updateQuery);		
+			database.execSQL(updateQuery);
+			
+		}
+	    
+	    public void updateSyncStatus(int rid, int status){         //This Method call to update sync status to 1 when json data is send to server and get the response as 1 from server
+			SQLiteDatabase database1 = this.getWritableDatabase();	 
+			
+			String updateQuery1 = "Update recently_accesed_table set server_response = "+ status +" where id="+ rid ;
+			Log.d("UpdateSyncStatus ",updateQuery1);		
+			database1.execSQL(updateQuery1);
+			
+		}
+	    
+	    public ArrayList<Android_Sync_POJO> getAndroid_sync_statusData()
+	    {
+	    	ArrayList<Android_Sync_POJO> androidSync = new ArrayList<Android_Sync_POJO>();
+	    	SQLiteDatabase sql=this.getReadableDatabase();
+	    	Bundle cursorData=new Bundle();
+	    	 Cursor c = sql.rawQuery("Select server_table_id,tablename,datetime FROM android_sync_status", null);
+		        if (c.moveToFirst()) {
+		            do {
+		            	
+		            	Android_Sync_POJO as=new Android_Sync_POJO();
+		            	as.setServerid(c.getInt(c.getColumnIndex("server_table_id")));  
+		                as.setTablename(c.getString(c.getColumnIndex("tablename")));
+		                as.setDatetime(c.getString(c.getColumnIndex("datetime")));  
+		                androidSync.add(as);
+
+		            } while (c.moveToNext());
+		        }
+		        Log.d("Android_sync_status table data"," "+androidSync);		
+		        return androidSync;
+	    	
+	    }
+	    
+	    public Bundle checkresponseflag()    // this method is called to check the flags of read_flag and server_flag to delete the data
+	    {
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	        Bundle cursorData = new Bundle();
+	       // String param[] = new String[1];
+	        //param[0] = firstname;
+	        Cursor c = sql.rawQuery("Select id,tablename,countfrom,countto FROM recently_accesed_table WHERE read_flag='1' AND server_response='1' OR server_response='3'", null);
+	        if (c.moveToFirst()) {
+	            do {
+	            	cursorData.putInt("id1", c.getInt(c.getColumnIndex("id")));  
+	                cursorData.putString("tablename", c.getString(c.getColumnIndex("tablename")));
+	                cursorData.putInt("countfrom", c.getInt(c.getColumnIndex("countfrom")));  
+	                cursorData.putInt("countto", c.getInt(c.getColumnIndex("countto")));  
+
+	            } while (c.moveToNext());
+	        }
+	        Log.d("Check response flag"," "+cursorData);		
+	        return cursorData;
+	    	
+	    }
+	    
+	    public void delete_classdata()     // this method is called when server_response and read_flag is 1 then delete that class data
+	    {
+	    	
+	    	Bundle bundle=this.checkresponseflag();
+	    	
+	    	id=bundle.getInt("id1");
+	    	tablename=bundle.getString("tablename");
+	    	countfrom=bundle.getInt("countfrom");
+	    	countto=bundle.getInt("countto");
+	    	SQLiteDatabase db = this.getReadableDatabase();
+	    	String query = "DELETE FROM '"+tablename+"'" + "WHERE id>="+countfrom +" AND  id<="+countto;
+	   		Cursor cursor=db.rawQuery(query, null);
+	           if(cursor.getCount()<=0) // UserName Not Exist
+	           {
+	           	cursor.close();
+	           	//return "NOT EXIST";
+	           }
+	   	    cursor.moveToFirst();
+	   		
+	   	    cursor.close();
+	   	 Log.d("In delete_all_data function"," "+query);		
+	   	   delete_recently_table_row(id);
+	   	
+	    }
+	    
+	    
+	    public void delete_recently_table_row(int id)
+	    {
+	    	
+	    	Log.d("In start of delete_recently_table_row","");	
+	    	SQLiteDatabase db = this.getReadableDatabase();
+	    	String query = "DELETE FROM recently_accesed_table" + " WHERE id="+id;
+	   		Cursor cursor=db.rawQuery(query, null);
+	           if(cursor.getCount()<=0) // UserName Not Exist
+	           {
+	           	cursor.close();
+	           	//return "NOT EXIST";
+	           }
+	   	    cursor.moveToFirst();
+	   	 Log.d("end of delete_recently_table_row"," "+query);	
+	   	    cursor.close();
+		
+	   		
+	    }
+	   /* public int getClassRecordCount() {    // this method is used for get the total count of table records
+	        String countQuery = "SELECT  * FROM classes";
+	        SQLiteDatabase db = this.getReadableDatabase();
+	        Cursor cursor = db.rawQuery(countQuery, null);
+	        cnt = cursor.getCount();
+	        cursor.close();
+	        return cnt;
+	    }*/
+	    
+	    public Bundle check_table_created_flag()     //this method is call from myservice class to make attendance table
+ 	    {
+	    	
+	    	SQLiteDatabase sql1 = this.getReadableDatabase();
+	    	Bundle cursorData = new Bundle();
+	    	Cursor c = sql1.rawQuery("SELECT class_code FROM classes WHERE table_created_flag='0'", null);
+	    	
+	    	 if (c.moveToFirst()) {
+		            do {
+		            	cursorData.putString("class_code", c.getString(c.getColumnIndex("class_code")));
+		               } while (c.moveToNext());
+		        }
+		        Log.d("Check table created flag"," "+cursorData);		
+		       
+	    	
+	    	 return cursorData;
+	    }
+	    
+	    public void createAttendanceTables()
+	    {
+	    	Bundle ccode=this.check_table_created_flag();
+	    	if(ccode.size()!=0)
+	    	{
+		    	classcode=ccode.getString("class_code");
+		    	SQLiteDatabase db = this.getReadableDatabase();
+		    	String query = "CREATE TABLE '"+classcode+"'(id INTEGER PRIMARY KEY,bioid TEXT,date DATE,time DATETIME,subject TEXT,slot INTEGER,att_type TEXT)";
+		   		Cursor cursor=db.rawQuery(query, null);
+		           if(cursor.getCount()<=0) // UserName Not Exist
+		           {
+		           	cursor.close();
+		           	//return "NOT EXIST";
+		           }
+		   	    cursor.moveToFirst();
+		    	
+		   	    cursor.close();
+		    	
+		   	   Log.d("In createAttendanceTables"," "+query);	
+		     
+		   	   updatetable_created_flag(classcode);
+	    	}
+	    }
+	    
+	    public void updatetable_created_flag(String classcode1){            //This Method call to update table created flag to 1 when table is created
+			SQLiteDatabase database = this.getWritableDatabase();
+			Log.d("class code (class name)",""+classcode1);		
+			String updateQuery = "Update classes set table_created_flag = '1' where class_code='"+classcode1+"'";
+			Log.d("Update table created status",updateQuery);		
+			database.execSQL(updateQuery);
+			
+		}
+	    
+	    public void insertUserTable(String ausername, String apass, String afname,
+				String amname, String alname, String aclasscode, int arollnum,
+				String atype, int aprivilege, String aconctnum, String apgaurdnum,
+				int pref_sms_lang, String aemail, String abioid, int activated,
+				String multilang, String photourl, String icardpht, int batchid,
+				int serverid,String datetime) {
+			// TODO Auto-generated method stub
+	    		SQLiteDatabase database1 = this.getWritableDatabase();	 
+	    		String updateQuery1 = "INSERT OR IGNORE INTO users (username,password,firstname,middlename,lastname,class_code,rollno,type,privilege,contact_nos,primary_guardian_contact,preferred_sms_language,email,bioid,activated,multilanguage,photourl,icard_photo,server_table_id,datetime) "
+	    				+ "VALUES ('"+ausername+"','"+apass+"','"+afname+"','"+amname+"','"+alname+"','"+aclasscode+"','"+arollnum+"','"+atype+"','"+aprivilege+"','"+aconctnum+"','"+apgaurdnum+"','"+pref_sms_lang+"','"+aemail+"','"+abioid+"','"+activated+"','"+multilang+"','"+photourl+"','"+icardpht+"','"+serverid+"','"+datetime+"')";
+	    		Log.d("InsertUserTable ",updateQuery1);		
+	    		database1.execSQL(updateQuery1);
+		} 
+	    
+	    public void insertteacherssub(String tsbioid, String tssub,String tsclasscode, int serverid,String datetime,String att_type,int batch_id) 
+	    {
+	    	SQLiteDatabase db = this.getWritableDatabase();	 
+    		String updateQuery1 = "INSERT OR IGNORE INTO teachers_subjects (bioid,subject,class_code,server_table_id,datetime,att_type,batch_id) VALUES ('"+tsbioid+"','"+tssub+"','"+tsclasscode+"','"+serverid+"','"+datetime+"','"+att_type+"','"+batch_id+"')";
+    		Log.d("Insert Teachers_Subjects Table ",updateQuery1);		
+    		db.execSQL(updateQuery1);
+			
+		}
+ 
+	    public void insertsubject(String subcode, String subname, String shortname,
+				String grpname,String datetime) {
+	    	SQLiteDatabase db = this.getWritableDatabase();	 
+    		String updateQuery1 = "INSERT OR IGNORE INTO subjects (subject_code,subject_name,short_name,group_name,datetime) VALUES ('"+subcode+"','"+subname+"','"+shortname+"','"+grpname+"','"+datetime+"')";
+    		Log.d("Insert Subjects Table ",updateQuery1);		
+    		db.execSQL(updateQuery1);
+			
+		}
+	    
+	    public void insertdeptteacher(int dtdeptid, String dtbioid,String dtprvtype, int serverid,String datetime) {
+			// TODO Auto-generated method stub
+	    	SQLiteDatabase db = this.getWritableDatabase();	 
+    		String updateQuery1 = "INSERT OR IGNORE INTO department_teachers (dept_id,bioid,prv_type,server_table_id,datetime) VALUES ('"+dtdeptid+"','"+dtbioid+"','"+dtprvtype+"','"+serverid+"','"+datetime+"')";
+    		Log.d("Insert data into department_teachers Table ",updateQuery1);		
+    		db.execSQL(updateQuery1);
+		}
+	    
+	    public void insertdeptclasses(int dtdeptid, String tsclasscode, int serverid,String datetime) {
+			// TODO Auto-generated method stub
+	    	SQLiteDatabase db = this.getWritableDatabase();	 
+    		String updateQuery1 = "INSERT OR IGNORE INTO department_classes (dept_id,class_code,server_table_id,datetime) VALUES ('"+dtdeptid+"','"+tsclasscode+"','"+serverid+"','"+datetime+"')";
+    		Log.d("Insert data into department_classes Table ",updateQuery1);		
+    		db.execSQL(updateQuery1);
+		}
+	    
+	    public void insertbatch(String batchname, int serverid, String datetime) {
+			// TODO Auto-generated method stub
+	    	SQLiteDatabase db = this.getWritableDatabase();	 
+    		String updateQuery1 = "INSERT OR IGNORE INTO practical_batches (batch_name,server_table_id,datetime) VALUES ('"+batchname+"','"+serverid+"','"+datetime+"')";
+    		Log.d("Insert data into batch Table ",updateQuery1);		
+    		db.execSQL(updateQuery1);
+		}
+	    
+	    public void insertStudentPractsBatch(String bbioid, int batchid,int serverid, String datetime) {
+			// TODO Auto-generated method stub
+	    	SQLiteDatabase db = this.getWritableDatabase();	 
+    		String updateQuery1 = "INSERT OR IGNORE INTO student_practical_batch (bioid,batch_id,server_table_id,datetime) VALUES ('"+bbioid+"','"+batchid+"','"+serverid+"','"+datetime+"')";
+    		Log.d("Insert data into student_practical_batch Table ",updateQuery1);		
+    		db.execSQL(updateQuery1);
+		}
+
+	    
+	    
+	    public void insertclasses(String cclasscode, String cclass,String csection, String cacdemictitle, String ccurrentacayear,int claststdid,String datetime) 
+	    {
+	    	SQLiteDatabase db = this.getWritableDatabase();	 
+    		String updateQuery1 = "INSERT OR IGNORE INTO classes (class_code,class,section,academic_title,current_academic_year,last_student_id,table_created_flag,datetime) VALUES ('"+cclasscode+"','"+cclass+"','"+csection+"','"+cacdemictitle+"','"+ccurrentacayear+"','"+claststdid+"','"+table_created_flag+"','"+datetime+"')";
+    		Log.d("Insert data into classes Table ",updateQuery1);		
+    		db.execSQL(updateQuery1);
+			
+		}
+
+	    public void insertsyncdata(String tablename2, String datetime, int serverid) {
+			// TODO Auto-generated method stub
+	    	SQLiteDatabase db = this.getWritableDatabase();	 
+    		String updateQuery1 = "INSERT OR IGNORE INTO android_sync_status (tablename,datetime,server_table_id) VALUES ('"+tablename2+"','"+datetime+"','"+serverid+"')";
+    		Log.d("Insert data into android_sync_table Table ",updateQuery1);		
+    		db.execSQL(updateQuery1);
+		}
+	    
+	    //This below two methods is for update the user table
+	    public void UpdateUserTable(String ausername, String apass, String afname,
+				String amname, String alname, String aclasscode, int arollnum,
+				String atype, int aprivilege, String aconctnum, String apgaurdnum,
+				int pref_sms_lang, String aemail, String abioid, int activated,
+				String multilang, String photourl, String icardpht, int batchid,
+				int serverid, String datetime) 
+	    {
+			// TODO Auto-generated method stub
+			SQLiteDatabase db=this.getWritableDatabase();
+			Bundle ccode=this.getUsersData(ausername);
+			if(ccode.size()!=0)
+			{
+				String updateQuery = "UPDATE users SET username = '"+ausername+"', password = '"+apass+"',firstname='"+afname+"',middlename='"+amname+"',lastname='"+alname+"',class_code='"+aclasscode+"',rollno='"+arollnum+"',type='"+atype+"',privilege='"+aprivilege+"',contact_nos='"+aconctnum+"',primary_guardian_contact='"+apgaurdnum+"',preferred_sms_language='"+pref_sms_lang+"',email='"+aemail+"',bioid='"+abioid+"',activated='"+activated+"',multilanguage='"+multilang+"',photourl='"+photourl+"',icard_photo='"+icardpht+"',server_table_id='"+serverid+"',datetime='"+datetime+"' WHERE username = '"+ausername+"' AND datetime < '"+datetime+"'" ;
+				Log.d("UpdateSyncStatus ",updateQuery);		
+				db.execSQL(updateQuery);
+			}
+			else
+			{
+				this.insertUserTable(ausername, apass, afname, amname, alname, aclasscode, arollnum, atype, aprivilege, aconctnum, apgaurdnum, pref_sms_lang, aemail, abioid, activated, multilang, photourl, icardpht, batchid, serverid, datetime);
+			}
+		}
+	    public Bundle getUsersData(String ausername)
+	    {
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	    	Bundle cursorData = new Bundle();
+	        Cursor c = sql.rawQuery("SELECT bioid FROM users WHERE  username ='" + ausername +"' AND type='" +type1+ "'", null);
+	        if (c.moveToFirst()) {
+	             do {
+	            	 cursorData.putString("bioid", c.getString(c.getColumnIndex("bioid")));
+	            	 
+	             } while (c.moveToNext());
+	         }
+	         return cursorData;
+	    }
+	    
+	    
+	  //This below two methods is for update the teachers_subjects table
+	    public void UpdateTeachersSub(String tsbioid, String tssub,String tsclasscode, int serverid, String datetime, String att_type, int batch_id) {
+			// TODO Auto-generated method stub
+	    	SQLiteDatabase db=this.getWritableDatabase();
+			Bundle ccode=this.getTeachersSubData(serverid);
+			if(ccode.size()!=0)
+			{
+				String updateQuery = "UPDATE teachers_subjects SET bioid = '"+tsbioid+"',subject = '"+tssub+"',class_code='"+tsclasscode+"',server_table_id='"+serverid+"',datetime='"+datetime+"',att_type='"+att_type+"',batch_id='"+batch_id+"' WHERE server_table_id = '"+serverid+"' AND datetime < '"+datetime+"'" ;
+				Log.d("UpdateSyncStatus ",updateQuery);		
+				db.execSQL(updateQuery);
+			}
+			else
+			{
+				this.insertteacherssub(tsbioid, tssub, tsclasscode, serverid, datetime, att_type, batch_id);
+			}
+			}
+	    public Bundle getTeachersSubData(int serverid)
+	    {
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	    	Bundle cursorData = new Bundle();
+	        Cursor c = sql.rawQuery("SELECT bioid,class_code FROM teachers_subjects WHERE server_table_id ='" + serverid +"'", null);
+	        if (c.moveToFirst()) {
+	             do {
+	            	 cursorData.putString("bioid", c.getString(c.getColumnIndex("bioid")));
+	            	 cursorData.putString("class_code", c.getString(c.getColumnIndex("class_code")));
+	             } while (c.moveToNext());
+	         }
+	         return cursorData;
+	    }
+	   
+	    
+	  //This below two methods is for update the subjects table
+	    public void UpdateSubject(String subcode, String subname, String shortname,String grpname, String datetime) 
+	    {
+			SQLiteDatabase db=this.getWritableDatabase();
+			Bundle ccode=this.getSubjectsData(subcode);
+			if(ccode.size()!=0)
+			{
+				String updateQuery = "UPDATE subjects SET subject_code = '"+subcode+"',subject_name = '"+subname+"',short_name='"+shortname+"',group_name='"+grpname+"',datetime='"+datetime+"' WHERE subject_code = '"+subcode+"' AND datetime < '"+datetime+"'" ;
+				Log.d("UpdateSyncStatus ",updateQuery);		
+				db.execSQL(updateQuery);
+			}
+			else
+			{
+				this.insertsubject(subcode, subname, shortname, grpname, datetime);
+			}
+			}
+	    public Bundle getSubjectsData(String subcode)
+	    {
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	    	Bundle cursorData = new Bundle();
+	        Cursor c = sql.rawQuery("SELECT subject_name FROM subjects WHERE subject_code = '"+subcode+"'", null);
+	        if (c.moveToFirst()) {
+	             do {
+	            	 cursorData.putString("subject_name", c.getString(c.getColumnIndex("subject_name")));
+	            	 
+	             } while (c.moveToNext());
+	         }
+	         return cursorData;
+	    }
+	    
+	    
+	  //This below two methods is for update the department_teachers table
+	    public void UpdateDeptTeacher(int dtdeptid, String dtbioid,String dtprvtype, int serverid, String datetime) 
+	    {
+			
+		    SQLiteDatabase db=this.getWritableDatabase();
+			Bundle ccode=this.getDeptTeacherData(serverid);
+			if(ccode.size()!=0)
+			{
+				String updateQuery = "UPDATE department_teachers SET dept_id = '"+dtdeptid+"',bioid = '"+dtbioid+"',prv_type='"+dtprvtype+"',server_table_id='"+serverid+"',datetime='"+datetime+"' WHERE server_table_id = '"+serverid+"' AND datetime < '"+datetime+"'" ;
+				Log.d("UpdateSyncStatus ",updateQuery);		
+				db.execSQL(updateQuery);
+			}
+			else
+			{
+				this.insertdeptteacher(dtdeptid, dtbioid, dtprvtype, serverid, datetime);
+			}
+			}
+	    public Bundle getDeptTeacherData(int serverid)
+	    {
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	    	Bundle cursorData = new Bundle();
+	        Cursor c = sql.rawQuery("SELECT bioid FROM department_teachers WHERE server_table_id ='" + serverid +"'", null);
+	        if (c.moveToFirst()) {
+	             do {
+	            	 cursorData.putString("bioid", c.getString(c.getColumnIndex("bioid")));
+	            	 
+	             } while (c.moveToNext());
+	         }
+	         return cursorData;
+	    }
+	    
+	    
+	  //This below two methods is for update the department_classes table
+	    public void UpdateDeptClasses(int dtdeptid, String tsclasscode,int serverid, String datetime) 
+	    {
+			// TODO Auto-generated method stub
+	    	SQLiteDatabase db=this.getWritableDatabase();
+			Bundle ccode=this.getDeptClassesData(serverid);
+			if(ccode.size()!=0)
+			{
+				String updateQuery = "UPDATE department_classes SET dept_id = '"+dtdeptid+"',class_code = '"+tsclasscode+"',server_table_id='"+serverid+"',datetime='"+datetime+"' WHERE server_table_id = '"+serverid+"' AND datetime < '"+datetime+"'" ;
+				Log.d("UpdateSyncStatus ",updateQuery);		
+				db.execSQL(updateQuery);
+			}
+			else
+			{
+				this.insertdeptclasses(dtdeptid, tsclasscode, serverid, datetime);
+			}
+			}
+	    public Bundle getDeptClassesData(int serverid)
+	    {
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	    	Bundle cursorData = new Bundle();
+	        Cursor c = sql.rawQuery("SELECT class_code FROM department_classes WHERE server_table_id ='" + serverid +"'", null);
+	        if (c.moveToFirst()) {
+	             do {
+	            	 cursorData.putString("class_code", c.getString(c.getColumnIndex("class_code")));
+	            	 
+	             } while (c.moveToNext());
+	         }
+	         return cursorData;
+	    }
+	    
+	    
+	  //This below two methods is for update the classes table
+	    public void UpdateClasses(String cclasscode, String cclass,String csection, String cacdemictitle, String ccurrentacayear,int claststdid, String datetime) 
+	    {
+			SQLiteDatabase db=this.getWritableDatabase();
+			Bundle ccode=this.getClassesData(cclasscode);
+			if(ccode.size()!=0)
+			{
+				String updateQuery = "UPDATE classes SET class_code = '"+cclasscode+"',class = '"+cclass+"',section='"+csection+"',academic_title='"+cacdemictitle+"',current_academic_year='"+ccurrentacayear+"',last_student_id='"+claststdid+"',datetime='"+datetime+"' WHERE class_code = '"+cclasscode+"' AND datetime < '"+datetime+"'" ;
+				Log.d("UpdateSyncStatus ",updateQuery);		
+				db.execSQL(updateQuery);
+			}
+			else
+			{
+				this.insertclasses(cclasscode, cclass, csection, cacdemictitle, ccurrentacayear, claststdid, datetime);
+			}
+		}
+	    public Bundle getClassesData(String cclasscode)
+	    {
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	    	Bundle cursorData = new Bundle();
+	        Cursor c = sql.rawQuery("SELECT class FROM classes WHERE class_code = '"+cclasscode+"'", null);
+	        if (c.moveToFirst()) {
+	             do {
+	            	 cursorData.putString("class", c.getString(c.getColumnIndex("class")));
+	            	 
+	             } while (c.moveToNext());
+	         }
+	         return cursorData;
+	    }
+	    
+	  //This below two methods is for update the batch table
+	    public void UpdateBatch(String batchname, int serverid, String datetime) 
+	    {
+			SQLiteDatabase db=this.getWritableDatabase();
+			Bundle ccode=this.getBatchData(serverid);
+			if(ccode.size()!=0)
+			{
+				String updateQuery = "UPDATE practical_batches SET batch_name = '"+batchname+"',server_table_id='"+serverid+"',datetime='"+datetime+"' WHERE service_id='"+serverid+"' AND datetime < '"+datetime+"'" ;
+				Log.d("UpdateSyncStatus ",updateQuery);		
+				db.execSQL(updateQuery);
+			}
+			else
+			{
+				this.insertbatch(batchname, serverid, datetime);
+			}
+		}
+	    public Bundle getBatchData(int serverid)
+	    {
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	    	Bundle cursorData = new Bundle();
+	        Cursor c = sql.rawQuery("SELECT class_code FROM practical_batches WHERE server_table_id = '"+serverid+"'", null);
+	        if (c.moveToFirst()) {
+	             do {
+	            	 cursorData.putString("class_code", c.getString(c.getColumnIndex("class_code")));
+	            	 
+	             } while (c.moveToNext());
+	         }
+	         return cursorData;
+	    }
+	    
+	  //This below two methods is for update the student_practical_batch table
+	    public void UpdateStudentPractsBatch(String bbioid, int batchid,int serverid, String datetime) {
+			// TODO Auto-generated method stub
+			SQLiteDatabase db=this.getWritableDatabase();
+			Bundle ccode=this.getBatchData(serverid);
+			if(ccode.size()!=0)
+			{
+				String updateQuery = "UPDATE student_practical_batch SET bioid = '"+bbioid+"',batch_id = '"+batchid+"',server_table_id='"+serverid+"',datetime='"+datetime+"' WHERE server_table_id = '"+serverid+"' AND datetime < '"+datetime+"'" ;
+				Log.d("UpdateSyncStatus ",updateQuery);		
+				db.execSQL(updateQuery);
+			}
+			else
+			{
+				this.insertStudentPractsBatch(bbioid, batchid, serverid, datetime);
+			}
+		}
+	    public Bundle getStudentsBatchData(int serverid)
+	    {
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	    	Bundle cursorData = new Bundle();
+	        Cursor c = sql.rawQuery("SELECT bioid FROM student_practical_batch WHERE server_table_id = '"+serverid+"'", null);
+	        if (c.moveToFirst()) {
+	             do {
+	            	 cursorData.putString("bioid", c.getString(c.getColumnIndex("bioid")));
+	            	 
+	             } while (c.moveToNext());
+	         }
+	         return cursorData;
+	    }
+	    
+	  //This below two methods is for updateSyncData the batch table
+	    public void UpdateSyncData(String tablename2, String datetime, int serverid) {
+			// TODO Auto-generated method stub
+			
+		
+			SQLiteDatabase db=this.getWritableDatabase();
+			Bundle ccode=this.getBatchData(serverid);
+			if(ccode.size()!=0)
+			{
+				String updateQuery = "UPDATE android_sync_status SET tablename = '"+tablename2+"',server_table_id='"+serverid+"',datetime='"+datetime+"' WHERE server_table_id = '"+serverid+"' AND datetime < '"+datetime+"'" ;
+				Log.d("UpdateSyncStatus ",updateQuery);		
+				db.execSQL(updateQuery);
+			}
+			else
+			{
+				this.insertsyncdata(tablename2, datetime, serverid);
+			}
+		}
+	    public Bundle getSyncData(int serverid)
+	    {
+	    	SQLiteDatabase sql = this.getReadableDatabase();
+	    	Bundle cursorData = new Bundle();
+	        Cursor c = sql.rawQuery("SELECT tablename FROM android_sync_status WHERE server_table_id = '"+serverid+"'", null);
+	        if (c.moveToFirst()) {
+	             do {
+	            	 cursorData.putString("tablename", c.getString(c.getColumnIndex("tablename")));
+	            	 
+	             } while (c.moveToNext());
+	         }
+	         return cursorData;
+	    }
+	    
+	public ArrayList<Cursor> getData(String Query){
+		//get writable database
+		SQLiteDatabase sqlDB = this.getWritableDatabase();
+		String[] columns = new String[] { "mesage" };
+		//an array list of cursor to save two cursors one has results from the query 
+		//other cursor stores error message if any errors are triggered
+		ArrayList<Cursor> alc = new ArrayList<Cursor>(2);
+		MatrixCursor Cursor2= new MatrixCursor(columns);
+		alc.add(null);
+		alc.add(null);
+		
+		
+		try{
+			String maxQuery = Query ;
+			//execute the query results will be save in Cursor c
+			Cursor c = sqlDB.rawQuery(maxQuery, null);
+			
+
+			//add value to cursor2
+			Cursor2.addRow(new Object[] { "Success" });
+			
+			alc.set(1,Cursor2);
+			if (null != c && c.getCount() > 0) {
+
+				
+				alc.set(0,c);
+				c.moveToFirst();
+				
+				return alc ;
+			}
+			return alc;
+		} catch(SQLException sqlEx){
+			Log.d("printing exception", sqlEx.getMessage());
+			//if any exceptions are triggered save the error message to cursor an return the arraylist
+			Cursor2.addRow(new Object[] { ""+sqlEx.getMessage() });
+			alc.set(1,Cursor2);
+			return alc;
+		} catch(Exception ex){
+
+			Log.d("printing exception", ex.getMessage());
+
+			//if any exceptions are triggered save the error message to cursor an return the arraylist
+			Cursor2.addRow(new Object[] { ""+ex.getMessage() });
+			alc.set(1,Cursor2);
+			return alc;
+		}
+
+		
+	}
+}
